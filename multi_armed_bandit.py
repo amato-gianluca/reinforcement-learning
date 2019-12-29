@@ -1,4 +1,5 @@
 import random
+from abc import abstractmethod
 
 from environment import Environment
 
@@ -24,8 +25,8 @@ class MultiArmedBandit(Environment):
         return range(0, len(self.means))
 
     def interaction(self, action: int) -> float:
-        self.best_actions.append(True if action == self.best_action else False)
         reward = random.normalvariate(self.means[action], self.scale)
+        self.best_actions.append(True if action == self.best_action else False)
         self.rewards.append(reward)
         return reward
 
