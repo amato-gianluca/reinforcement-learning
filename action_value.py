@@ -2,8 +2,9 @@ import math
 import random
 
 from typing import Any, List, Callable, TypeVar, Generic, Tuple
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from abc import abstractmethod, ABC
+from itertools import accumulate
 
 from environment import Environment
 
@@ -15,11 +16,12 @@ def maximal_action(seq: List[T], key: Callable[[T], float]) -> T:
     matches = [i for i, x in enumerate(prefs) if x == m]
     return seq[random.choice(matches)]
 
-@dataclass
+@dataclass(eq=False)
 class ActionInQueue(Generic[T]):
     action: T
     preference: float
     num_taken: int
+    pi: float = field(init=False)   # Needed for some applications
 
 class ActionValue(Generic[T], ABC):
     '''An action-value agent for reinforcement learning.'''
@@ -118,6 +120,43 @@ class MeanValueUCB(MeanValueUpdate[T], UCBActionSelection[T]):
 class ConstantStepUCB(ConstantStepUpdate[T], UCBActionSelection[T]):
     pass
 
+class GradientAlgorithm(ActionValue[T]):
+    def __init__(self, *args: Any, alpha: float, baseline: bool = True, **kwargs: Any) -> None:
+        self.alpha = alpha
+        self.numsteps = 0
+        self.baseline = baseline
+        self.meanreward = 0.0
+        super().__init__(*args, **kwargs)
+
+    def reset(self) -> None:
+        self.numsteps = 0
+        self.meanreward = 0.0
+        super().reset()
+
+    def select_action(self) -> ActionInQueue[T]:
+        self.numsteps += 1
+        r = random.random()
+        sum_exp = 0.0
+        for a in self.actions:
+            a.pi = math.exp(a.preference)
+            sum_exp += a.pi
+        for a in self.actions:
+            a.pi /= sum_exp
+        sum_cum = 0.0
+        for a in self.actions:
+            sum_cum += a.pi
+            if sum_cum > r: return a
+        return self.actions[-1]         # this should never happen, just to make mypy happy
+
+    def update_preferences(self, act: ActionInQueue[T], reward: float) -> None:
+        if self.baseline:
+            self.meanreward += (reward - self.meanreward) / self.numsteps
+        for a in self.actions:
+            if a is act:
+                a.preference += self.alpha*(reward - self.meanreward)*(1 - a.pi)
+            else:
+                a.preference -= self.alpha*(reward - self.meanreward)*a.pi
+
 __all__ = [ 'ActionValue' , 'GreedyActionSelection', 'EpsilonGreedyActionSelection', 'UCBActionSelection',
             'MeanValueUpdate', 'ConstantStepUpdate', 'MeanValueGreedy', 'MeanValueEpsilonGreedy',
-            'ConstantStepEpsilonGreedy', 'MeanValueUCB', 'ConstantStepUCB']
+            'ConstantStepEpsilonGreedy', 'MeanValueUCB', 'ConstantStepUCB', 'GradientAlgorithm']
