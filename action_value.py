@@ -21,7 +21,7 @@ class ActionInQueue(Generic[T]):
     action: T
     preference: float
     num_taken: int
-    pi: float = field(init=False)   # Needed for some applications
+    pi: float = field(init=False, default=0.0)   # Needed for some applications
 
 class ActionValue(Generic[T], ABC):
     '''An action-value agent for reinforcement learning.'''
@@ -38,6 +38,7 @@ class ActionValue(Generic[T], ABC):
         for a in self.actions:
             a.preference = self.initial_preference
             a.num_taken = 0
+            a.pi = 0.0
 
     @abstractmethod
     def update_preferences(self, a: ActionInQueue[T], reward: float) -> None:
@@ -105,6 +106,15 @@ class ConstantStepUpdate(ActionValue[T]):
     def update_preferences(self, a: ActionInQueue[T], reward: float) -> None:
         a.preference += self.alpha * (reward - a.preference)
 
+class ExpWeightNoBias(ActionValue[T]):
+    def __init__(self, *args: Any, alpha: float, **kwargs: Any) -> None:
+        self.alpha = alpha
+        super().__init__(*args,**kwargs)
+
+    def update_preferences(self, a: ActionInQueue[T], reward: float) -> None:
+        a.pi = a.pi + self.alpha*(1-a.pi)
+        a.preference += self.alpha / a.pi * (reward - a.preference)
+
 class MeanValueGreedy(MeanValueUpdate[T], GreedyActionSelection[T]):
     pass
 
@@ -112,6 +122,9 @@ class MeanValueEpsilonGreedy(MeanValueUpdate[T], EpsilonGreedyActionSelection[T]
     pass
 
 class ConstantStepEpsilonGreedy(ConstantStepUpdate[T], EpsilonGreedyActionSelection[T]):
+    pass
+
+class ExpWeightNoBiasEpsilonGreedy(ExpWeightNoBias[T], EpsilonGreedyActionSelection[T]):
     pass
 
 class MeanValueUCB(MeanValueUpdate[T], UCBActionSelection[T]):
@@ -159,4 +172,5 @@ class GradientAlgorithm(ActionValue[T]):
 
 __all__ = [ 'ActionValue' , 'GreedyActionSelection', 'EpsilonGreedyActionSelection', 'UCBActionSelection',
             'MeanValueUpdate', 'ConstantStepUpdate', 'MeanValueGreedy', 'MeanValueEpsilonGreedy',
-            'ConstantStepEpsilonGreedy', 'MeanValueUCB', 'ConstantStepUCB', 'GradientAlgorithm']
+            'ConstantStepEpsilonGreedy', 'MeanValueUCB', 'ConstantStepUCB', 'GradientAlgorithm',
+            'ExpWeightNoBiasEpsilonGreedy']
