@@ -1,4 +1,4 @@
-from typing import Tuple, NewType, List, Iterable
+from typing import Tuple, Iterable
 from enum import Enum, auto
 from itertools import product
 
@@ -30,23 +30,27 @@ class GridWorld(MDP[Cell, Action]):
         r, c = s
         border = False
         if a == Action.west:
-            c -= 1
-            if c == -1:
+            if c == 0:
                 border = True
-                c = self.cols - 1 if self.wrap else 1
+                c = self.cols - 1 if self.wrap else r
+            else:
+                c -= 1
         elif a == Action.east:
-            c += 1
-            if c == self.cols:
+            if c == self.cols - 1:
                 border = True
-                c = 0 if self.wrap else self.cols - 1
+                c = 0 if self.wrap else c
+            else:
+                c += 1
         elif a == Action.north:
-            r -= 1
-            if r == -1:
+            if r == 0:
                 border = True
-                r = self.rows-1 if self.wrap else 1
+                r = self.rows - 1 if self.wrap else r
+            else:
+                r -= 1
         elif a == Action.south:
-            r += 1
-            if r == self.rows:
+            if r == self.rows - 1:
                 border = True
-                r = 0 if self.wrap else self.rows - 1
+                r = 0 if self.wrap else r
+            else:
+                r += 1
         return (r, c), border

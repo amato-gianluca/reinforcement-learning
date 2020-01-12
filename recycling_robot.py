@@ -14,7 +14,7 @@ class Action(Enum):
 
 class RecyclingRobot(MDP[State, Action]):
 
-    def __init__(self, alpha: float, beta: float, rsearch: float, rwait: float):
+    def __init__(self, alpha: float, beta: float, rsearch: float, rwait: float) -> None:
         self.alpha = alpha
         self.beta = beta
         self.rsearch = rsearch
@@ -54,5 +54,3 @@ class RecyclingRobot(MDP[State, Action]):
                 return [
                     (Probability(1.0), Reward(0.0), State.high)
                 ]
-    
-
