@@ -6,6 +6,9 @@ class Gambler(MDP[int, int]):
     def __init__(self, goal: int, ph: float) -> None:
         self.goal = goal
         self.ph = ph
+    
+    def is_final(self, s: int):
+        return s == 0 or s == self.goal
 
     def states(self) -> Iterable[int]:
         return range(self.goal+1)

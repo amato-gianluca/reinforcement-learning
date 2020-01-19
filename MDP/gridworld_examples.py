@@ -7,6 +7,9 @@ class GridWorld1(GridWorld):
     def __init__(self) -> None:
         super().__init__(rows = 5, cols = 5, wrap = False)
 
+    def is_final(self, s: Cell):
+        return False
+
     def p(self, s: Cell, a: Action) -> Iterable[Tuple[Probability, Reward, Cell]]:
         if s == (0, 1):
             return [ (Probability(1.0), Reward(10.0), (4,1)) ]
@@ -19,6 +22,9 @@ class GridWorld1(GridWorld):
 class GridWorld2(GridWorld):
     def __init__(self) -> None:
         super().__init__(rows = 4, cols = 4, wrap = False)
+
+    def is_final(self, s: Cell):
+        return s == (0,0) or s == (3,3)
 
     def p(self, s: Cell, a: Action) -> Iterable[Tuple[Probability, Reward, Cell]]:
         if s == (0,0) or s == (3,3):
