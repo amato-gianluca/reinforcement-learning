@@ -2,7 +2,7 @@ from typing import Tuple, Iterable
 from enum import Enum, auto
 from itertools import product
 
-from MDP import MDP
+from MDP.mdp import MDP
 
 Cell = Tuple[int, int]
 

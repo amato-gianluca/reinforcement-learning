@@ -1,7 +1,7 @@
 from typing import Tuple, Iterable
 
-from MDP import Probability, Reward
-from gridworld import Cell, Action, GridWorld
+from environment import Probability, Reward
+from MDP.gridworld import Cell, Action, GridWorld
 
 class GridWorld1(GridWorld):
     def __init__(self) -> None:

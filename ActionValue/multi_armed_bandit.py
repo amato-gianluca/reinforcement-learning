@@ -4,7 +4,7 @@ import random
 from typing import List, TypeVar, Iterable
 from abc import abstractmethod
 
-from environment import Environment
+from ActionValue.environment import Environment
 
 class MultiArmedBandit(Environment[int]):
     def __init__(self, means: List[float], scale: float = 1.0, drift: float = 0.0):

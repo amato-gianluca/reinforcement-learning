@@ -1,5 +1,6 @@
-from MDP import Reward, Probability, MDP
 from typing import Tuple, Iterable
+
+from MDP.mdp import Reward, Probability, MDP
 
 class Gambler(MDP[int, int]):
     def __init__(self, goal: int, ph: float) -> None:

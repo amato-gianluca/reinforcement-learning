@@ -1,7 +1,8 @@
 from typing import Tuple, Iterable
 from enum import Enum, auto
 
-from MDP import Reward, Probability, MDP
+from environment import Reward, Probability
+from MDP.mdp import MDP
 
 class State(Enum):
     high = auto()

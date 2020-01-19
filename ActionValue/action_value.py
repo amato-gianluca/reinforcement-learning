@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from abc import abstractmethod, ABC
 from itertools import accumulate
 
-from environment import Environment
+from ActionValue.environment import Environment
 
 T = TypeVar('T')
 

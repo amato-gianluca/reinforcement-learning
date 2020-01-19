@@ -1,6 +1,7 @@
 from typing import TypeVar, Optional, MutableMapping, Tuple
-from MDP import MDP, Probability, Policy
 import math
+
+from MDP.mdp import MDP, Probability, Policy
 
 S = TypeVar('S')
 A = TypeVar('A')
