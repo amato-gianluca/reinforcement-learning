@@ -1,38 +1,26 @@
-from typing import Generic, TypeVar, Tuple, Iterable, NewType, Dict, List
-from abc import abstractmethod, ABC
+from typing import Tuple, Iterable
+from abc import abstractmethod
+from random import random, choice
 
-S = TypeVar('S')
-A = TypeVar('A')
-Reward = NewType('Reward', float)
-Probability = NewType('Probability', float)
-Policy = Dict[S, List[Tuple[Probability,A]]]
+from environment import S, A, Environment, Probability, Reward
 
-class MDP(Generic[S,A], ABC):
-    """A class representing a Markov Decision Process"""
-
-    @abstractmethod
-    def states(self) -> Iterable[S]:
-        """Returns the set of states of this MDP"""
-        pass
-
-    @abstractmethod
-    def actions(self, s: S) -> Iterable[A]:
-        """Returns the set of actions available in states s"""
-        pass
+class MDP(Environment[S, A]):
+    """A environment derived from a Markov Decision Process"""
 
     @abstractmethod
     def p(self, s: S, a: A) -> Iterable[Tuple[Probability, Reward, S]]:
-        """Returns a list of triples (p, r, s') shich is the set of possible
-        pairs of reward and newstate with related probability"""
-        pass
+        """Returns a list of triples (p, r, s') shich is the set of possible pairs of reward and
+        newstate with related probability"""
 
-    def random_policy(self) -> Policy[S, A]:
-        """Return a random policy where each action has the same probability"""
-        policy = { }
-        for s in self.states():
-            actions = list(self.actions(s))
-            n = len(actions)
-            policy[s] = [ (Probability(1/n), a) for a in actions ]
-        return policy
+    def initial_state(self) -> S:
+        return choice(list(self.states()))
 
-__all__ = [ 'MDP', 'Probability', 'Reward', 'Policy']
+    def interaction(self, state: S, action: A) -> Tuple[Reward, S]:
+        results = self.p(state, action)
+        prob = random()
+        prob_accum = 0.0
+        for p, reward, newstate in results:
+            prob_accum += p
+            if prob < prob_accum:
+                return reward, newstate
+        return reward, newstate   # should never happen

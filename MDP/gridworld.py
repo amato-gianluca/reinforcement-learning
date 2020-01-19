@@ -23,7 +23,7 @@ class GridWorld(MDP[Cell, Action]):
         the row number and c is the column number."""
         return product(range(self.rows), range(self.cols))
 
-    def actions(self, s: Cell) -> Iterable[Action]:
+    def actions(self, state: Cell) -> Iterable[Action]:
         return Action
 
     def normal_move(self, s: Cell, a: Action) -> Tuple[Cell, bool]:

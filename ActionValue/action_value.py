@@ -1,16 +1,16 @@
-import math
-import random
-
 from typing import Any, List, Callable, TypeVar, Generic, Tuple
 from dataclasses import dataclass, field
 from abc import abstractmethod, ABC
-from itertools import accumulate
+
+import math
+import random
 
 from ActionValue.environment import Environment
 
 T = TypeVar('T')
 
 def maximal_action(seq: List[T], key: Callable[[T], float]) -> T:
+    '''Returns a randomly picked element of seq whose key value is macimal'''
     prefs = [key(x) for x in seq]
     m = max(prefs)
     matches = [i for i, x in enumerate(prefs) if x == m]
@@ -30,8 +30,8 @@ class ActionValue(Generic[T], ABC):
         '''Initialize the agent with environment and initial preference for all actions.'''
         self.env = env
         self.initial_preference = initial_preference
-        self.actions = [ ActionInQueue(a, initial_preference, 0) for a in env.actions() ]
-    
+        self.actions = [ActionInQueue(a, initial_preference, 0) for a in env.actions()]
+
     def reset(self) -> None:
         '''Reinitialize agent and related environment.'''
         self.env.reset()
@@ -42,13 +42,12 @@ class ActionValue(Generic[T], ABC):
 
     @abstractmethod
     def update_preferences(self, a: ActionInQueue[T], reward: float) -> None:
-        '''Updates the preferences of the agent given the executed action and corresponding reward.'''
-        pass
+        '''Updates the preferences of the agent given the executed action and corresponding
+        reward.'''
 
     @abstractmethod
     def select_action(self) -> ActionInQueue[T]:
         '''Returns the action the agent would perform in the current step'''
-        pass
 
     def step(self) -> Tuple[T, float]:
         '''Perform a single interaction with the environment and updates the internal state.
@@ -92,7 +91,7 @@ class UCBActionSelection(ActionValue[T]):
 
     def select_action(self) -> ActionInQueue[T]:
         self.numsteps += 1
-        return maximal_action(self.actions, key = self.__preference)
+        return maximal_action(self.actions, key=self.__preference)
 
 class MeanValueUpdate(ActionValue[T]):
     def update_preferences(self, a: ActionInQueue[T], reward: float) -> None:
@@ -101,7 +100,7 @@ class MeanValueUpdate(ActionValue[T]):
 class ConstantStepUpdate(ActionValue[T]):
     def __init__(self, *args: Any, alpha: float, **kwargs: Any) -> None:
         self.alpha = alpha
-        super().__init__(*args,**kwargs)
+        super().__init__(*args, **kwargs)
 
     def update_preferences(self, a: ActionInQueue[T], reward: float) -> None:
         a.preference += self.alpha * (reward - a.preference)
@@ -109,7 +108,7 @@ class ConstantStepUpdate(ActionValue[T]):
 class ExpWeightNoBias(ActionValue[T]):
     def __init__(self, *args: Any, alpha: float, **kwargs: Any) -> None:
         self.alpha = alpha
-        super().__init__(*args,**kwargs)
+        super().__init__(*args, **kwargs)
 
     def update_preferences(self, a: ActionInQueue[T], reward: float) -> None:
         a.pi = a.pi + self.alpha*(1-a.pi)
@@ -158,19 +157,20 @@ class GradientAlgorithm(ActionValue[T]):
         sum_cum = 0.0
         for a in self.actions:
             sum_cum += a.pi
-            if sum_cum > r: return a
+            if sum_cum > r:
+                return a
         return self.actions[-1]         # this should never happen, just to make mypy happy
 
-    def update_preferences(self, act: ActionInQueue[T], reward: float) -> None:
+    def update_preferences(self, a: ActionInQueue[T], reward: float) -> None:
         if self.baseline:
             self.meanreward += (reward - self.meanreward) / self.numsteps
-        for a in self.actions:
-            if a is act:
-                a.preference += self.alpha*(reward - self.meanreward)*(1 - a.pi)
+        for act in self.actions:
+            if act is a:
+                act.preference += self.alpha*(reward - self.meanreward)*(1 - act.pi)
             else:
-                a.preference -= self.alpha*(reward - self.meanreward)*a.pi
+                act.preference -= self.alpha*(reward - self.meanreward)*act.pi
 
-__all__ = [ 'ActionValue' , 'GreedyActionSelection', 'EpsilonGreedyActionSelection', 'UCBActionSelection',
-            'MeanValueUpdate', 'ConstantStepUpdate', 'MeanValueGreedy', 'MeanValueEpsilonGreedy',
-            'ConstantStepEpsilonGreedy', 'MeanValueUCB', 'ConstantStepUCB', 'GradientAlgorithm',
-            'ExpWeightNoBiasEpsilonGreedy']
+__all__ = ['ActionValue', 'GreedyActionSelection', 'EpsilonGreedyActionSelection', 
+           'UCBActionSelection', 'MeanValueUpdate', 'ConstantStepUpdate', 'MeanValueGreedy',
+           'MeanValueEpsilonGreedy', 'ConstantStepEpsilonGreedy', 'MeanValueUCB', 'ConstantStepUCB',
+           'GradientAlgorithm', 'ExpWeightNoBiasEpsilonGreedy']

@@ -23,13 +23,16 @@ class RecyclingRobot(MDP[State, Action]):
 
     def states(self) -> Iterable[State]:
         return State
-    
-    def actions(self, s: State)-> Iterable[Action]:
-        if s == State.high:
-            return [ Action.wait, Action.search ]
+
+    def is_final(self, _state: State) -> bool:
+        return False
+
+    def actions(self, state: State)-> Iterable[Action]:
+        if state == State.high:
+            return [Action.wait, Action.search]
         else:
             return Action
-    
+
     def p(self, s: State, a: Action) -> Iterable[Tuple[Probability, Reward, State]]:
         if s == State.high:
             if a == Action.search:
