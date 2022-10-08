@@ -1,13 +1,15 @@
-from typing import Tuple, Iterable
-from enum import Enum, auto
+from typing import Iterable
+from enum import Enum, auto, unique
 
 from environment import Reward, Probability
 from MDP.mdp import MDP
 
+@unique
 class State(Enum):
     high = auto()
     low = auto()
 
+@unique
 class Action(Enum):
     search = auto()
     wait = auto()
@@ -33,7 +35,7 @@ class RecyclingRobot(MDP[State, Action]):
         else:
             return Action
 
-    def p(self, s: State, a: Action) -> Iterable[Tuple[Probability, Reward, State]]:
+    def p(self, s: State, a: Action) -> Iterable[tuple[Probability, Reward, State]]:
         if s == State.high:
             if a == Action.search:
                 return [
@@ -58,3 +60,5 @@ class RecyclingRobot(MDP[State, Action]):
                 return [
                     (Probability(1.0), Reward(0.0), State.high)
                 ]
+
+__all__ = ['State', 'Action', 'RecyclingRobot']

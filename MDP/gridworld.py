@@ -1,11 +1,12 @@
-from typing import Tuple, Iterable
-from enum import Enum, auto
+from enum import Enum, auto, unique
 from itertools import product
+from typing import Iterable, TypeAlias
 
 from MDP.mdp import MDP
 
-Cell = Tuple[int, int]
+Cell: TypeAlias = tuple[int, int]
 
+@unique
 class Action(Enum):
     west = auto()
     east = auto()
@@ -23,10 +24,10 @@ class GridWorld(MDP[Cell, Action]):
         the row number and c is the column number."""
         return product(range(self.rows), range(self.cols))
 
-    def actions(self, state: Cell) -> Iterable[Action]:
+    def actions(self, _: Cell) -> Iterable[Action]:
         return Action
 
-    def normal_move(self, s: Cell, a: Action) -> Tuple[Cell, bool]:
+    def normal_move(self, s: Cell, a: Action) -> tuple[Cell, bool]:
         r, c = s
         border = False
         if a == Action.west:
@@ -54,3 +55,5 @@ class GridWorld(MDP[Cell, Action]):
             else:
                 r += 1
         return (r, c), border
+
+__all__ = ['Action', 'GridWorld']

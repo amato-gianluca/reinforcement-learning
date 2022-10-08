@@ -1,14 +1,15 @@
 from __future__ import annotations
-from typing import Iterable, Generic, TypeVar
-from abc import abstractmethod, ABC
 
-T = TypeVar('T')
+from abc import ABC, abstractmethod
+from typing import Generic, Iterable, TypeVar
 
-class Environment(Generic[T], ABC):
+A = TypeVar('A')
+
+class Environment(Generic[A], ABC):
     """An abstract class representing an environment."""
 
     @abstractmethod
-    def actions(self) -> Iterable[T]:
+    def actions(self) -> Iterable[A]:
         """Returns an iterable of the actions which are supported by the environment."""
 
     @abstractmethod
@@ -16,9 +17,11 @@ class Environment(Generic[T], ABC):
         """Put the environment at the state immediately after creation."""
 
     @abstractmethod
-    def copy(self) -> Environment[T]:
+    def copy(self) -> Environment[A]:
         """Create a copy of the environment, including activity logs"""
 
     @abstractmethod
-    def interaction(self, action: T) -> float:
+    def interaction(self, action: A) -> float:
         """Interact with the environment executing the given action. It returns the reward."""
+
+__all__ = ['Environment']

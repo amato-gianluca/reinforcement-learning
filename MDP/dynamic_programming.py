@@ -1,8 +1,12 @@
-from typing import Optional, Tuple
 import math
+from typing import Optional, TypeVar
 
-from environment import S, A, Probability, Policy, StateValue
+from environment import Policy, Probability, StateValue
+
 from MDP.mdp import MDP
+
+S = TypeVar('S')
+A = TypeVar('A')
 
 def policy_evaluation(mdp: MDP[S, A], pi: Policy[S, A], gamma: float, theta: float,
                       v: Optional[StateValue[S]] = None) -> StateValue[S]:
@@ -39,7 +43,7 @@ def policy_improvement(mdp: MDP[S, A], v: StateValue[S], gamma: float) -> Policy
     return pi
 
 def policy_iteration(mdp: MDP[S, A], gamma: float, theta: float,
-                     pi: Optional[Policy[S, A]] = None) -> Tuple[Policy[S, A], StateValue[S]]:
+                     pi: Optional[Policy[S, A]] = None) -> tuple[Policy[S, A], StateValue[S]]:
     """Return best policy and state-value function for an MDP. gamma and theta have the same
     meaning as in policy_evaluation, and pi is an optional initial policy"""
     if pi is None:
@@ -47,13 +51,13 @@ def policy_iteration(mdp: MDP[S, A], gamma: float, theta: float,
     v = {s : 0.0 for s in mdp.states()}
     while True:
         policy_evaluation(mdp, pi, gamma, theta, v)
-        pinew = policy_improvement(mdp, v, gamma)
+        pinew: Policy[S, A] = policy_improvement(mdp, v, gamma)
         if pi == pinew:
             break
         pi = pinew
     return pi, v
 
-def value_iteration(mdp: MDP[S, A], gamma: float, theta: float) -> Tuple[Policy[S, A], StateValue[S]]:
+def value_iteration(mdp: MDP[S, A], gamma: float, theta: float) -> tuple[Policy[S, A], StateValue[S]]:
     """Similar to  policy_iteration but use the value-iteration method instead"""
     v = {s : 0.0 for s in mdp.states()}
     while True:
@@ -68,3 +72,5 @@ def value_iteration(mdp: MDP[S, A], gamma: float, theta: float) -> Tuple[Policy[
         if delta < theta:
             break
     return policy_improvement(mdp, v, gamma), v
+
+__all__ = ['policy_evaluation', 'policy_improvement', 'policy_iteration', 'value_iteration']

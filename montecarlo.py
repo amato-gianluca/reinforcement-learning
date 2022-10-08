@@ -1,8 +1,11 @@
-import random
-import math
+from random import choice
+from typing import Optional, TypeVar
 
-from typing import Optional
-from environment import S, A, Environment, Policy, StateValue, StateActionValue, Probability
+from environment import (Environment, Policy, Probability, StateActionValue,
+                         StateValue)
+
+S = TypeVar('S')
+A = TypeVar('A')
 
 def policy_evaluation(env: Environment[S, A], pi: Policy[S, A], gamma: float, iterates: int) -> StateValue[S]:
     """Evaluate a policy using Monte Carlo methods"""
@@ -12,7 +15,7 @@ def policy_evaluation(env: Environment[S, A], pi: Policy[S, A], gamma: float, it
         G = 0.0
         episode = env.generate_episode(pi)
         for i in range(len(episode)-1, -1, -1):
-            state, _action, reward = episode[i]
+            state, _, reward = episode[i]
             G = G*gamma + reward
             if any(s == state for s, _, r in episode[0:i]):
                 continue
@@ -23,12 +26,12 @@ def policy_evaluation(env: Environment[S, A], pi: Policy[S, A], gamma: float, it
 def policy_evaluation_es(env: Environment[S, A], pi: Policy[S, A], gamma: float,
                          iterates: int) -> StateActionValue[S, A]:
     """Evaluate a policy using Monte Carlo methods and Exploring Starts method"""
-    stateactions = [(s, a)  for s in env.states() for a in env.actions(s)]
+    stateactions = [(s, a) for s in env.states() for a in env.actions(s)]
     v = {(s, a) : 0.0 for s, a in stateactions}
     numvisits = {(s, a) : 0 for s, a in stateactions}
     for _i in range(iterates):
         G = 0.0
-        s0, a0 = random.choice(stateactions)
+        s0, a0 = choice(stateactions)
         episode = env.generate_episode(pi, initial_state=s0, initial_action=a0)
         for i in range(len(episode)-1, -1, -1):
             state, action, reward = episode[i]
@@ -50,7 +53,7 @@ def montecarlo_es(env: Environment[S, A], gamma: float, iterates: int,
         pi = env.random_policy()
     for _i in range(iterates):
         G = 0.0
-        s0, a0 = random.choice(stateactions)
+        s0, a0 = choice(stateactions)
         episode = env.generate_episode(pi, initial_state=s0, initial_action=a0)
         for i in range(len(episode)-1, -1, -1):
             state, action, reward = episode[i]
@@ -62,3 +65,5 @@ def montecarlo_es(env: Environment[S, A], gamma: float, iterates: int,
             pi[state] = [(Probability(1.0), max(env.actions(state), key=lambda a: v[state, a]))]
         print(pi)
     return pi
+
+__all__ = ['policy_evaluation', 'policy_evaluation_es', 'montecarlo_es']

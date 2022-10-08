@@ -1,20 +1,19 @@
-from typing import Any, List, Callable, TypeVar, Generic, Tuple
-from dataclasses import dataclass, field
-from abc import abstractmethod, ABC
-
 import math
-import random
+from abc import ABCMeta, abstractmethod
+from dataclasses import dataclass, field
+from random import choice, random, randrange
+from typing import Any, Callable, Generic, TypeVar
 
 from ActionValue.environment import Environment
 
 T = TypeVar('T')
 
-def maximal_action(seq: List[T], key: Callable[[T], float]) -> T:
-    '''Returns a randomly picked element of seq whose key value is macimal'''
+def maximal_action(seq: list[T], key: Callable[[T], float]) -> T:
+    '''Returns a randomly picked element of seq whose key value is maximal'''
     prefs = [key(x) for x in seq]
     m = max(prefs)
     matches = [i for i, x in enumerate(prefs) if x == m]
-    return seq[random.choice(matches)]
+    return seq[choice(matches)]
 
 @dataclass(eq=False)
 class ActionInQueue(Generic[T]):
@@ -23,7 +22,7 @@ class ActionInQueue(Generic[T]):
     num_taken: int
     pi: float = field(init=False, default=0.0)   # Needed for some applications
 
-class ActionValue(Generic[T], ABC):
+class ActionValue(Generic[T], metaclass = ABCMeta):
     '''An action-value agent for reinforcement learning.'''
 
     def __init__(self, env: Environment[T], initial_preference: float = 0.0) -> None:
@@ -49,7 +48,7 @@ class ActionValue(Generic[T], ABC):
     def select_action(self) -> ActionInQueue[T]:
         '''Returns the action the agent would perform in the current step'''
 
-    def step(self) -> Tuple[T, float]:
+    def step(self) -> tuple[T, float]:
         '''Perform a single interaction with the environment and updates the internal state.
         It returns the action performed and the reward obtained.'''
         a = self.select_action()
@@ -68,8 +67,8 @@ class EpsilonGreedyActionSelection(ActionValue[T]):
         super().__init__(*args, **kwargs)
 
     def select_action(self) -> ActionInQueue[T]:
-        if random.random() < self.epsilon:
-            return self.actions[random.randrange(0, len(self.actions))]
+        if random() < self.epsilon:
+            return self.actions[randrange(0, len(self.actions))]
         else:
             return maximal_action(self.actions, lambda x: x.preference)
 
@@ -147,7 +146,7 @@ class GradientAlgorithm(ActionValue[T]):
 
     def select_action(self) -> ActionInQueue[T]:
         self.numsteps += 1
-        r = random.random()
+        r = random()
         sum_exp = 0.0
         for a in self.actions:
             a.pi = math.exp(a.preference)
@@ -170,7 +169,7 @@ class GradientAlgorithm(ActionValue[T]):
             else:
                 act.preference -= self.alpha*(reward - self.meanreward)*act.pi
 
-__all__ = ['ActionValue', 'GreedyActionSelection', 'EpsilonGreedyActionSelection', 
+__all__ = ['ActionValue', 'GreedyActionSelection', 'EpsilonGreedyActionSelection',
            'UCBActionSelection', 'MeanValueUpdate', 'ConstantStepUpdate', 'MeanValueGreedy',
            'MeanValueEpsilonGreedy', 'ConstantStepEpsilonGreedy', 'MeanValueUCB', 'ConstantStepUCB',
            'GradientAlgorithm', 'ExpWeightNoBiasEpsilonGreedy']

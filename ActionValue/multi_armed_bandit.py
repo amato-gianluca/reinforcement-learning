@@ -1,18 +1,20 @@
 from __future__ import annotations
-from typing import List, Iterable
+
 from random import normalvariate
+from typing import Iterable
 
 from ActionValue.environment import Environment
 
+
 class MultiArmedBandit(Environment[int]):
     """A multi-armed bandit environment"""
-    def __init__(self, means: List[float], scale: float = 1.0, drift: float = 0.0):
+    def __init__(self, means: list[float], scale: float = 1.0, drift: float = 0.0):
         self.original_means = means.copy()
         self.num_actions = len(means)
         self.scale = scale
         self.drift = drift
-        self.best_actions: List[int] = []
-        self.rewards: List[float] = []
+        self.best_actions: list[int] = []
+        self.rewards: list[float] = []
         self.reset()
 
     def reset(self) -> None:
@@ -46,3 +48,5 @@ class MultiArmedBandit(Environment[int]):
     def random_gen(n: int, mean_loc: float = 0.0, mean_scale: float = 1.0, scale: float = 1.0) -> MultiArmedBandit:
         means = [normalvariate(mean_loc, mean_scale) for x in range(n)]
         return MultiArmedBandit(means, scale)
+
+__all__ = ['MultiArmedBandit']

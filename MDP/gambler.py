@@ -1,6 +1,7 @@
-from typing import Tuple, Iterable
+from typing import Iterable
 
 from environment import Probability, Reward
+
 from MDP.mdp import MDP
 
 class Gambler(MDP[int, int]):
@@ -17,7 +18,7 @@ class Gambler(MDP[int, int]):
     def actions(self, state: int) -> Iterable[int]:
         return range(min(state + 1, self.goal - state + 1))
 
-    def p(self, s: int, a: int) -> Iterable[Tuple[Probability, Reward, int]]:
+    def p(self, s: int, a: int) -> Iterable[tuple[Probability, Reward, int]]:
         if a == 0:
             return [(Probability(1), Reward(0.0), 0)]
         else:
@@ -25,4 +26,5 @@ class Gambler(MDP[int, int]):
                 (Probability(self.ph), Reward(1.0 if s+a == self.goal else 0.0), s+a),
                 (Probability(1 - self.ph), Reward(0.0), s - a)
             ]
-        
+
+__all__ = ['Gambler']

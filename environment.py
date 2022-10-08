@@ -1,17 +1,17 @@
-from typing import Generic, TypeVar, NewType, Dict, List, Tuple, Iterable
-from typing import Optional, MutableMapping
-from abc import abstractmethod, ABC
+from abc import ABCMeta, abstractmethod
+from collections.abc import Iterable, MutableMapping
 from random import random
+from typing import Generic, NewType, Optional, TypeAlias, TypeVar
 
 S = TypeVar('S')
 A = TypeVar('A')
 
 Reward = NewType('Reward', float)
 Probability = NewType('Probability', float)
-Policy = Dict[S, List[Tuple[Probability, A]]]
-Episode = List[Tuple[S, A, Reward]]
-StateValue = MutableMapping[S, float]
-StateActionValue = MutableMapping[Tuple[S, A], float]
+Policy: TypeAlias = dict[S, list[tuple[Probability, A]]]
+Episode: TypeAlias = list[tuple[S, A, Reward]]
+StateValue: TypeAlias = MutableMapping[S, float]
+StateActionValue: TypeAlias = MutableMapping[tuple[S, A], float]
 
 def policy_action_selection(pi: Policy[S, A], s: S) -> A:
     """Returns a random action following a policy"""
@@ -21,9 +21,9 @@ def policy_action_selection(pi: Policy[S, A], s: S) -> A:
         prob_accum += p
         if prob < prob_accum:
             return a
-    return a     # should never happen
+    raise Exception("Error in random action selection. This should never happen")
 
-class Environment(Generic[S, A], ABC):
+class Environment(Generic[S, A], metaclass=ABCMeta):
     """An abstract class representing an environment."""
 
     @abstractmethod
@@ -43,13 +43,13 @@ class Environment(Generic[S, A], ABC):
         """Returns an iterable of the actions which are possible in the given state."""
 
     @abstractmethod
-    def interaction(self, state: S, action: A) -> Tuple[Reward, S]:
+    def interaction(self, state: S, action: A) -> tuple[Reward, S]:
         """Interact with the environment executing the given action on the given state. It returns
         the reward and new state."""
 
     def random_policy(self) -> Policy[S, A]:
         """Return a random policy where each action has the same probability"""
-        policy = {}
+        policy: Policy[S, A] = {}
         for s in self.states():
             actions = list(self.actions(s))
             n = len(actions)
@@ -61,7 +61,7 @@ class Environment(Generic[S, A], ABC):
         """Generate an episode for the environment following the given policy and
         optional initial state and initial action."""
         episode: Episode[S, A] = []
-        state = self.initial_state() if initial_state is None else initial_state
+        state = initial_state or self.initial_state()
         if initial_action:
             reward, newstate = self.interaction(state, initial_action)
             episode.append((state, initial_action, reward))
@@ -72,3 +72,5 @@ class Environment(Generic[S, A], ABC):
             episode.append((state, action, reward))
             state = newstate
         return episode
+
+__all__ = ['Reward', 'Probability', 'Policy', 'Episode', 'StateValue', 'StateActionValue', 'Environment', 'policy_action_selection']
